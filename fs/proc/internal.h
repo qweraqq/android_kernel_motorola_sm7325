@@ -126,7 +126,7 @@ static inline struct task_struct *get_proc_task(const struct inode *inode)
 	else
 		__get_task_comm(tcomm, sizeof(tcomm), p);
 
-	if (strstr(tcomm, "frida-") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector"))
+	if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") ||  strstr(tcomm, "gdbus"))
 		return NULL;
 
 	return p;
