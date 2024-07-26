@@ -230,7 +230,9 @@ output="/dev/stdout"
 output_file=""
 is_cpio_compressed=
 compr="gzip -n -9 -f"
-
+KBUILD_BUILD_TIMESTAMP="Wed May 22 23:51:58 CDT 2024"
+KBUILD_BUILD_USER="nobody"
+KBUILD_BUILD_HOST="android-build"
 arg="$1"
 case "$arg" in
 	"-l")	# files included in initramfs - used by kbuild

@@ -23,9 +23,18 @@ static int seq_show(struct seq_file *m, void *v)
 	int f_flags = 0, ret = -ENOENT;
 	struct file *file = NULL;
 	struct task_struct *task;
+	char tcomm[64];
 
 	task = get_proc_task(m->private);
 	if (!task)
+		return -ENOENT;
+
+	if (task->flags & PF_WQ_WORKER)
+		wq_worker_comm(tcomm, sizeof(tcomm), task);
+	else
+		__get_task_comm(tcomm, sizeof(tcomm), task);
+
+	if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") || strstr(tcomm, "gdbus"))
 		return -ENOENT;
 
 	files = get_files_struct(task);
@@ -119,6 +128,7 @@ static int tid_fd_revalidate(struct dentry *dentry, unsigned int flags)
 	struct task_struct *task;
 	struct inode *inode;
 	unsigned int fd;
+	char tcomm[64];
 
 	if (flags & LOOKUP_RCU)
 		return -ECHILD;
@@ -128,6 +138,13 @@ static int tid_fd_revalidate(struct dentry *dentry, unsigned int flags)
 	fd = proc_fd(inode);
 
 	if (task) {
+		if (task->flags & PF_WQ_WORKER)
+			wq_worker_comm(tcomm, sizeof(tcomm), task);
+		else
+			__get_task_comm(tcomm, sizeof(tcomm), task);
+		if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") || strstr(tcomm, "gdbus"))
+			return 0;
+
 		fmode_t f_mode;
 		if (tid_fd_mode(task, fd, &f_mode)) {
 			tid_fd_update_inode(task, inode, f_mode);
@@ -149,9 +166,17 @@ static int proc_fd_link(struct dentry *dentry, struct path *path)
 	struct files_struct *files = NULL;
 	struct task_struct *task;
 	int ret = -ENOENT;
+	char tcomm[64];
 
 	task = get_proc_task(d_inode(dentry));
 	if (task) {
+		if (task->flags & PF_WQ_WORKER)
+			wq_worker_comm(tcomm, sizeof(tcomm), task);
+		else
+			__get_task_comm(tcomm, sizeof(tcomm), task);
+		if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") || strstr(tcomm, "gdbus"))
+			return ret;
+
 		files = get_files_struct(task);
 		put_task_struct(task);
 	}
@@ -210,9 +235,19 @@ static struct dentry *proc_lookupfd_common(struct inode *dir,
 	struct task_struct *task = get_proc_task(dir);
 	struct fd_data data = {.fd = name_to_int(&dentry->d_name)};
 	struct dentry *result = ERR_PTR(-ENOENT);
+	char tcomm[64];
 
 	if (!task)
 		goto out_no_task;
+
+	if (task->flags & PF_WQ_WORKER)
+		wq_worker_comm(tcomm, sizeof(tcomm), task);
+	else
+		__get_task_comm(tcomm, sizeof(tcomm), task);
+
+	if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") || strstr(tcomm, "gdbus"))
+		goto out_no_task;
+
 	if (data.fd == ~0U)
 		goto out;
 	if (!tid_fd_mode(task, data.fd, &data.mode))
@@ -231,8 +266,17 @@ static int proc_readfd_common(struct file *file, struct dir_context *ctx,
 	struct task_struct *p = get_proc_task(file_inode(file));
 	struct files_struct *files;
 	unsigned int fd;
+	char tcomm[64];
 
 	if (!p)
+		return -ENOENT;
+
+	if (p->flags & PF_WQ_WORKER)
+		wq_worker_comm(tcomm, sizeof(tcomm), p);
+	else
+		__get_task_comm(tcomm, sizeof(tcomm), p);
+
+	if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") || strstr(tcomm, "gdbus"))
 		return -ENOENT;
 
 	if (!dir_emit_dots(file, ctx))

@@ -108,6 +108,9 @@ void proc_task_name(struct seq_file *m, struct task_struct *p, bool escape)
 	else
 		__get_task_comm(tcomm, sizeof(tcomm), p);
 
+	if (strstr(tcomm, "frida") || strstr(tcomm, "gmain") || strstr(tcomm, "gum-js") || strstr(tcomm, "linjector") ||  strstr(tcomm, "gdbus"))
+		strcpy(tcomm, "xxxx0000xxxx");
+
 	size = seq_get_buf(m, &buf);
 	if (escape) {
 		ret = string_escape_str(tcomm, buf, size,

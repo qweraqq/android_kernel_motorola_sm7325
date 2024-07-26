@@ -180,3 +180,6 @@ Add the following code before the last line of this file
 
         CONFIG_HID_AKSYS_QRD=m
         CONFIG_AKSYS_QRD_FF=y
+
+
+Linux version 5.4.254-moto-g3d632fc45b76 (nobody@android-build) (Android (6877366 based on r383902b1) clang version 11.0.2 (https://android.googlesource.com/toolchain/llvm-project b397f81060ce6d701042b782172ed13bee898b79), LLD 11.0.2 (https://android.googlesource.com/toolchain/llvm-project b397f81060ce6d701042b782172ed13bee898b79)) #1 SMP PREEMPT Wed May 22 23:51:58 CDT 2024
